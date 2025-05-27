@@ -39,7 +39,7 @@ int main(void) {
     }
 }
 */
-
+/*
 //emisor
 #define F_CPU 16000000UL
 #include <avr/io.h>
@@ -81,9 +81,9 @@ int main(void) {
     }
 }
 
+*/
 
 
-/*
 // receptor
 #define F_CPU 16000000UL
 #include <avr/io.h>
@@ -99,7 +99,7 @@ void config_USART(void) {
 }
 
 ISR(USART_RX_vect) {
-    UDR0 = senal;
+    senal = UDR0;
 }
 
 int main(void) {
@@ -119,4 +119,3 @@ int main(void) {
         }
     }
 }
-*/
