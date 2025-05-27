@@ -46,88 +46,61 @@ int main(void) {
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
+volatile char senal2 = 0;
+
 void config_USART(void) {
-    
-    UCSR0B = (1 << TXEN0); 
+    UBRR0 = 0x67;
+    UCSR0B = (1 << TXEN0) | (1 << RXEN0) | (1 << RXCIE0); 
     UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); 
-    UBRR0 = 103;
 }
 
-void senal(char c) {
+void enviar(char c) {
     while (!(UCSR0A & (1 << UDRE0)));
     UDR0 = c;
 }
 
 void config_PCINT(void) {
-   PCICR |= (1 << PCIE0);       
+    PCICR |= (1 << PCIE0);           
     PCMSK0 |= (1 << PCINT0) | (1 << PCINT1); 
 }
 
 ISR(PCINT0_vect) {
-
- if (!(PINB & 0x01)) { 
-            _delay_ms(100);
-            if (!(PINB & 0x01)) {
-                senal('1'); 
-            }
+    if (!(PINB & 0x01)) {
+        _delay_ms(50);
+        if (!(PINB & 0x01)) {
+            enviar('1');  
         }
-
+    }
+    if (!(PINB & 0x02)) {
+        _delay_ms(50);
         if (!(PINB & 0x02)) {
-            _delay_ms(100);
-            if (!(PINB & 0x02)) {
-                senal('0');
-            }
-          }
+            enviar('0'); 
+        }
+    }
 }
+
+ISR(USART_RX_vect) {
+    senal2 = UDR0;
+}
+
 int main(void) {
-    DDRB &= ~0x03;
-    PORTB |= 0x03;  
+    DDRD |= 0xC0;     
+    PORTD &= ~0xC0;   
+
+    DDRB &= ~0x03;    
+    PORTB |= 0x03;    
 
     config_USART();
     config_PCINT();
     sei();
 
     while (1) {
-        
-    }
-}
-
-
-
-/*
-// receptor
-#define F_CPU 16000000UL
-#include <avr/io.h>
-#include <util/delay.h>
-#include <avr/interrupt.h>
-
-volatile char senal = 0;
-
-void config_USART(void) {
-    UCSR0B = (1 << RXEN0) | (1 << RXCIE0); 
-    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); 
-    UBRR0 = 103; 
-}
-
-ISR(USART_RX_vect) {
-    senal = UDR0;
-}
-
-int main(void) {
-    DDRD |= 0xc0; // Motor conectado a PD7
-    PORTD &= ~0xc0; // Apagado al inicio
-
-    config_USART();
-    sei();
-
-    while (1) {
-        if (senal == '1') {
-            PORTD |= 0xc0;  
-            senal = 0;
-        } else if (senal == '0') {
+        if (senal2 == '1') {
+            PORTD |= 0xC0;  
+            senal2 = 0;
+        } else if (senal2 == '0') {
             PORTD &= ~0x80; 
-            senal = 0;
+            senal2 = 0;
         }
     }
 }
-*/
