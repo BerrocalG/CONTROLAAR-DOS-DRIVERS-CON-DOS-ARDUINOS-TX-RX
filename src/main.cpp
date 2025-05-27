@@ -39,7 +39,7 @@ int main(void) {
     }
 }
 */
-/*
+
 //emisor
 #define F_CPU 16000000UL
 #include <avr/io.h>
@@ -58,14 +58,14 @@ void senal(char c) {
     UDR0 = c;
 }
 
-int main(void) {
-    DDRB &= ~0x03;
-    PORTB |= 0x03;  
+void config_PCINT(void) {
+   PCICR |= (1 << PCIE0);       
+    PCMSK0 |= (1 << PCINT0) | (1 << PCINT1); 
+}
 
-    config_USART();
+ISR(PCINT0_vect) {
 
-    while (1) {
-        if (!(PINB & 0x01)) { 
+ if (!(PINB & 0x01)) { 
             _delay_ms(100);
             if (!(PINB & 0x01)) {
                 senal('1'); 
@@ -77,13 +77,24 @@ int main(void) {
             if (!(PINB & 0x02)) {
                 senal('0');
             }
-        }
+          }
+}
+int main(void) {
+    DDRB &= ~0x03;
+    PORTB |= 0x03;  
+
+    config_USART();
+    config_PCINT();
+    sei();
+
+    while (1) {
+        
     }
 }
 
-*/
 
 
+/*
 // receptor
 #define F_CPU 16000000UL
 #include <avr/io.h>
@@ -119,3 +130,4 @@ int main(void) {
         }
     }
 }
+*/
